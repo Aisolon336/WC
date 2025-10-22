@@ -1,78 +1,113 @@
+let worker = document.getElementById('worker');
+let toilet = document.getElementById('toilet');
+let obstaclesContainer = document.getElementById('obstacles');
+let levelDisplay = document.getElementById('levelDisplay');
+let timerDisplay = document.getElementById('timerDisplay');
 
-const worker = document.getElementById('worker');
-const toilet = document.getElementById('toilet');
-const obstacles = document.querySelectorAll('.obstacle');
-const restartBtn = document.getElementById('restartBtn');
-const timerDisplay = document.getElementById('timer');
+let x = 50, y = 200;
+let level = parseInt(localStorage.getItem('level')) || 1;
+let timeLeft = parseInt(localStorage.getItem('timeLeft')) || 30;
+let timerInterval;
 
-const startSound = document.getElementById('startSound');
-const collisionSound = document.getElementById('collisionSound');
-const winSound = document.getElementById('winSound');
-const timeoutSound = document.getElementById('timeoutSound');
+const levels = {
+  1: [300, 500],
+  2: [250, 400, 600],
+  3: [200, 350, 500, 650]
+};
 
-let x = 50;
-let timeLeft = 30;
-let timer;
-let gameActive = true;
-
-function checkCollision(newX) {
-  for (let obs of obstacles) {
-    const obsX = parseInt(obs.style.left);
-    if (newX + 50 > obsX && newX < obsX + 50) {
-      collisionSound.play();
-      return true;
-    }
-  }
-  return false;
+function placeObstacles() {
+  obstaclesContainer.innerHTML = '';
+  levels[level].forEach(pos => {
+    let obs = document.createElement('div');
+    obs.style.left = pos + 'px';
+    obs.style.top = '200px';
+    obstaclesContainer.appendChild(obs);
+  });
 }
 
 function updatePosition() {
   worker.style.left = x + 'px';
+  worker.style.top = y + 'px';
   toilet.style.left = x + 'px';
+  toilet.style.top = (y + 60) + 'px';
 }
 
-document.addEventListener('keydown', (e) => {
-  if (!gameActive) return;
-  let newX = x;
-  if (e.key === 'ArrowRight') newX += 10;
-  if (e.key === 'ArrowLeft') newX -= 10;
+function checkCollision() {
+  let collided = false;
+  levels[level].forEach(pos => {
+    if (x >= pos && x <= pos + 50 && y === 200) {
+      collided = true;
+    }
+  });
+  return collided;
+}
 
-  if (!checkCollision(newX)) {
-    x = newX;
-    updatePosition();
+function nextLevel() {
+  level++;
+  if (level > 3) {
+    alert('Alle Level geschafft!');
+    level = 1;
+  } else {
+    alert('Level geschafft!');
   }
+  x = 50;
+  y = 200;
+  timeLeft = 30;
+  localStorage.setItem('level', level);
+  localStorage.setItem('timeLeft', timeLeft);
+  levelDisplay.textContent = 'Level: ' + level;
+  timerDisplay.textContent = 'Zeit: ' + timeLeft;
+  placeObstacles();
+  updatePosition();
+}
 
-  if (x > window.innerWidth - 60) {
-    winSound.play();
-    alert('WC erfolgreich transportiert!');
-    gameActive = false;
-    clearInterval(timer);
-  }
-});
+function restartGame() {
+  level = 1;
+  timeLeft = 30;
+  x = 50;
+  y = 200;
+  localStorage.setItem('level', level);
+  localStorage.setItem('timeLeft', timeLeft);
+  levelDisplay.textContent = 'Level: ' + level;
+  timerDisplay.textContent = 'Zeit: ' + timeLeft;
+  placeObstacles();
+  updatePosition();
+  clearInterval(timerInterval);
+  startTimer();
+}
 
 function startTimer() {
-  timerDisplay.textContent = 'Zeit: ' + timeLeft;
-  timer = setInterval(() => {
+  timerInterval = setInterval(() => {
     timeLeft--;
     timerDisplay.textContent = 'Zeit: ' + timeLeft;
+    localStorage.setItem('timeLeft', timeLeft);
     if (timeLeft <= 0) {
-      timeoutSound.play();
-      alert('Zeit abgelaufen! Spiel vorbei.');
-      clearInterval(timer);
-      gameActive = false;
+      clearInterval(timerInterval);
+      alert('Zeit abgelaufen!');
     }
   }, 1000);
 }
 
-restartBtn.addEventListener('click', () => {
-  x = 50;
-  timeLeft = 30;
-  gameActive = true;
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'ArrowRight') x += 10;
+  if (e.key === 'ArrowLeft') x -= 10;
+  if (e.key === 'ArrowUp') y -= 10;
+  if (e.key === 'ArrowDown') y += 10;
+
+  if (checkCollision()) {
+    x -= 10;
+    alert('Kollision mit Hindernis!');
+  }
+
   updatePosition();
-  clearInterval(timer);
-  startSound.play();
-  startTimer();
+
+  if (x > window.innerWidth - 60) {
+    nextLevel();
+  }
 });
 
-startSound.play();
+levelDisplay.textContent = 'Level: ' + level;
+timerDisplay.textContent = 'Zeit: ' + timeLeft;
+placeObstacles();
+updatePosition();
 startTimer();
