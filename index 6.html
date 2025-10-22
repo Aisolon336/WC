@@ -1,0 +1,172 @@
+
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <title>WC-Träger-Spiel mit Leveln</title>
+  <style>
+    body { margin: 0; overflow: hidden; background: #eef; font-family: sans-serif; }
+    #gameArea {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      background: #cce;
+    }
+    .worker, .toilet, .obstacle {
+      position: absolute;
+      width: 50px;
+      height: 50px;
+      background-size: cover;
+    }
+    .worker {
+      background-color: #444;
+      left: 50px;
+      top: 200px;
+      transition: left 0.1s, top 0.1s;
+    }
+    .toilet {
+      background-color: #999;
+      left: 50px;
+      top: 260px;
+    }
+    .obstacle {
+      background-color: red;
+    }
+    #info {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background: white;
+      padding: 5px 10px;
+      border-radius: 5px;
+    }
+    #restartBtn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      padding: 5px 10px;
+      background: #88f;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div id="gameArea">
+    <div id="info">Level: 1 | Zeit: <span id="timer">30</span>s</div>
+    <button id="restartBtn">Neustart</button>
+    <div class="worker" id="worker"></div>
+    <div class="toilet" id="toilet"></div>
+  </div>
+
+  <script>
+    const worker = document.getElementById('worker');
+    const toilet = document.getElementById('toilet');
+    const gameArea = document.getElementById('gameArea');
+    const timerDisplay = document.getElementById('timer');
+    const restartBtn = document.getElementById('restartBtn');
+    const info = document.getElementById('info');
+
+    let x = 50, y = 200;
+    let level = 1;
+    let timeLeft = 30;
+    let timerInterval;
+    let obstacles = [];
+
+    const levelData = {
+      1: [{x: 300, y: 200}, {x: 500, y: 300}],
+      2: [{x: 400, y: 100}, {x: 600, y: 250}, {x: 700, y: 350}],
+      3: [{x: 350, y: 150}, {x: 550, y: 200}, {x: 750, y: 300}, {x: 850, y: 400}]
+    };
+
+    function createObstacles() {
+      obstacles.forEach(obs => obs.remove());
+      obstacles = [];
+      levelData[level].forEach(pos => {
+        const obs = document.createElement('div');
+        obs.className = 'obstacle';
+        obs.style.left = pos.x + 'px';
+        obs.style.top = pos.y + 'px';
+        gameArea.appendChild(obs);
+        obstacles.push(obs);
+      });
+    }
+
+    function resetGame() {
+      x = 50;
+      y = 200;
+      level = 1;
+      timeLeft = 30;
+      updatePosition();
+      updateTimer();
+      createObstacles();
+      clearInterval(timerInterval);
+      timerInterval = setInterval(() => {
+        timeLeft--;
+        updateTimer();
+        if (timeLeft <= 0) {
+          alert('Zeit abgelaufen! Spiel vorbei.');
+          resetGame();
+        }
+      }, 1000);
+    }
+
+    function updateTimer() {
+      timerDisplay.textContent = timeLeft;
+      info.innerHTML = `Level: ${level} | Zeit: <span id="timer">${timeLeft}</span>s`;
+    }
+
+    function updatePosition() {
+      worker.style.left = x + 'px';
+      worker.style.top = y + 'px';
+      toilet.style.left = x + 'px';
+      toilet.style.top = (y + 60) + 'px';
+    }
+
+    function checkCollision(newX, newY) {
+      return obstacles.some(obs => {
+        const ox = parseInt(obs.style.left);
+        const oy = parseInt(obs.style.top);
+        return Math.abs(newX - ox) < 50 && Math.abs(newY - oy) < 50;
+      });
+    }
+
+    document.addEventListener('keydown', (e) => {
+      let newX = x;
+      let newY = y;
+      if (e.key === 'ArrowRight') newX += 10;
+      if (e.key === 'ArrowLeft') newX -= 10;
+      if (e.key === 'ArrowUp') newY -= 10;
+      if (e.key === 'ArrowDown') newY += 10;
+
+      if (!checkCollision(newX, newY)) {
+        x = newX;
+        y = newY;
+        updatePosition();
+      }
+
+      if (x > window.innerWidth - 60) {
+        level++;
+        if (level > Object.keys(levelData).length) {
+          alert('Alle Level geschafft! 🎉');
+          resetGame();
+        } else {
+          alert('Level geschafft! Weiter geht's...');
+          x = 50;
+          y = 200;
+          timeLeft = 30;
+          updatePosition();
+          updateTimer();
+          createObstacles();
+        }
+      }
+    });
+
+    restartBtn.addEventListener('click', resetGame);
+
+    resetGame();
+  </script>
+</body>
+</html>
