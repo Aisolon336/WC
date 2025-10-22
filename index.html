@@ -2,19 +2,18 @@
 <html lang="de">
 <head>
   <meta charset="UTF-8">
-  <title>WC-Spiel mit Levelstruktur</title>
+  <title>WC-Spiel mit Highscore</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
+  <h1>WC-Spiel</h1>
+  <p id="highscoreDisplay">Highscore: Level 0</p>
+  <p id="levelDisplay">Aktuelles Level: 1</p>
+  <p id="timerDisplay">Zeit: 30</p>
+  <button onclick="restartGame()">Neustart</button>
   <div id="gameArea">
-    <div id="worker"></div>
-    <div id="toilet"></div>
-    <div id="obstacles"></div>
-    <div id="info">
-      <span id="levelDisplay">Level: 1</span>
-      <span id="timerDisplay">Zeit: 30</span>
-      <button onclick="restartGame()">Neustart</button>
-    </div>
+    <div class="worker" id="worker"></div>
+    <div class="toilet" id="toilet"></div>
   </div>
   <script src="script.js"></script>
 </body>

@@ -1,77 +1,53 @@
 let worker = document.getElementById('worker');
 let toilet = document.getElementById('toilet');
-let obstaclesContainer = document.getElementById('obstacles');
+let gameArea = document.getElementById('gameArea');
 let levelDisplay = document.getElementById('levelDisplay');
 let timerDisplay = document.getElementById('timerDisplay');
+let highscoreDisplay = document.getElementById('highscoreDisplay');
 
 let x = 50, y = 200;
-let level = parseInt(localStorage.getItem('level')) || 1;
+let level = parseInt(localStorage.getItem('currentLevel')) || 1;
 let timeLeft = parseInt(localStorage.getItem('timeLeft')) || 30;
+let highscore = parseInt(localStorage.getItem('highscore')) || 0;
 let timerInterval;
 
-const levels = {
-  1: [300, 500],
-  2: [250, 400, 600],
-  3: [200, 350, 500, 650]
+const levelObstacles = {
+  1: [300],
+  2: [300, 500],
+  3: [300, 500, 700]
 };
 
+function updateDisplay() {
+  levelDisplay.textContent = 'Aktuelles Level: ' + level;
+  timerDisplay.textContent = 'Zeit: ' + timeLeft;
+  highscoreDisplay.textContent = 'Highscore: Level ' + highscore;
+}
+
 function placeObstacles() {
-  obstaclesContainer.innerHTML = '';
-  levels[level].forEach(pos => {
+  document.querySelectorAll('.obstacle').forEach(e => e.remove());
+  let positions = levelObstacles[level] || [];
+  positions.forEach(pos => {
     let obs = document.createElement('div');
+    obs.className = 'obstacle';
     obs.style.left = pos + 'px';
     obs.style.top = '200px';
-    obstaclesContainer.appendChild(obs);
+    gameArea.appendChild(obs);
   });
 }
 
-function updatePosition() {
+function restartGame() {
+  x = 50;
+  y = 200;
+  level = 1;
+  timeLeft = 30;
+  localStorage.setItem('currentLevel', level);
+  localStorage.setItem('timeLeft', timeLeft);
+  updateDisplay();
+  placeObstacles();
   worker.style.left = x + 'px';
   worker.style.top = y + 'px';
   toilet.style.left = x + 'px';
   toilet.style.top = (y + 60) + 'px';
-}
-
-function checkCollision() {
-  let collided = false;
-  levels[level].forEach(pos => {
-    if (x >= pos && x <= pos + 50 && y === 200) {
-      collided = true;
-    }
-  });
-  return collided;
-}
-
-function nextLevel() {
-  level++;
-  if (level > 3) {
-    alert('Alle Level geschafft!');
-    level = 1;
-  } else {
-    alert('Level geschafft!');
-  }
-  x = 50;
-  y = 200;
-  timeLeft = 30;
-  localStorage.setItem('level', level);
-  localStorage.setItem('timeLeft', timeLeft);
-  levelDisplay.textContent = 'Level: ' + level;
-  timerDisplay.textContent = 'Zeit: ' + timeLeft;
-  placeObstacles();
-  updatePosition();
-}
-
-function restartGame() {
-  level = 1;
-  timeLeft = 30;
-  x = 50;
-  y = 200;
-  localStorage.setItem('level', level);
-  localStorage.setItem('timeLeft', timeLeft);
-  levelDisplay.textContent = 'Level: ' + level;
-  timerDisplay.textContent = 'Zeit: ' + timeLeft;
-  placeObstacles();
-  updatePosition();
   clearInterval(timerInterval);
   startTimer();
 }
@@ -79,35 +55,68 @@ function restartGame() {
 function startTimer() {
   timerInterval = setInterval(() => {
     timeLeft--;
-    timerDisplay.textContent = 'Zeit: ' + timeLeft;
     localStorage.setItem('timeLeft', timeLeft);
+    updateDisplay();
     if (timeLeft <= 0) {
-      clearInterval(timerInterval);
       alert('Zeit abgelaufen!');
+      clearInterval(timerInterval);
     }
   }, 1000);
 }
 
 document.addEventListener('keydown', (e) => {
-  if (e.key === 'ArrowRight') x += 10;
-  if (e.key === 'ArrowLeft') x -= 10;
-  if (e.key === 'ArrowUp') y -= 10;
-  if (e.key === 'ArrowDown') y += 10;
+  let newX = x, newY = y;
+  if (e.key === 'ArrowRight') newX += 10;
+  if (e.key === 'ArrowLeft') newX -= 10;
+  if (e.key === 'ArrowUp') newY -= 10;
+  if (e.key === 'ArrowDown') newY += 10;
 
-  if (checkCollision()) {
-    x -= 10;
-    alert('Kollision mit Hindernis!');
+  let blocked = false;
+  document.querySelectorAll('.obstacle').forEach(obs => {
+    let obsX = parseInt(obs.style.left);
+    let obsY = parseInt(obs.style.top);
+    if (Math.abs(newX - obsX) < 50 && Math.abs(newY - obsY) < 50) {
+      blocked = true;
+    }
+  });
+
+  if (!blocked && newX >= 0 && newX <= 750 && newY >= 0 && newY <= 350) {
+    x = newX;
+    y = newY;
+    worker.style.left = x + 'px';
+    worker.style.top = y + 'px';
+    toilet.style.left = x + 'px';
+    toilet.style.top = (y + 60) + 'px';
   }
 
-  updatePosition();
-
-  if (x > window.innerWidth - 60) {
-    nextLevel();
+  if (x > 750) {
+    level++;
+    if (level > highscore) {
+      highscore = level;
+      localStorage.setItem('highscore', highscore);
+    }
+    localStorage.setItem('currentLevel', level);
+    timeLeft = 30;
+    localStorage.setItem('timeLeft', timeLeft);
+    updateDisplay();
+    placeObstacles();
+    x = 50;
+    y = 200;
+    worker.style.left = x + 'px';
+    worker.style.top = y + 'px';
+    toilet.style.left = x + 'px';
+    toilet.style.top = (y + 60) + 'px';
+    if (level > 3) {
+      alert('Alle Level geschafft!');
+      clearInterval(timerInterval);
+    }
   }
 });
 
-levelDisplay.textContent = 'Level: ' + level;
-timerDisplay.textContent = 'Zeit: ' + timeLeft;
+updateDisplay();
 placeObstacles();
-updatePosition();
+worker.style.left = x + 'px';
+worker.style.top = y + 'px';
+toilet.style.left = x + 'px';
+toilet.style.top = (y + 60) + 'px';
 startTimer();
