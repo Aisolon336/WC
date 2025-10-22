@@ -1,15 +1,22 @@
-body { margin: 0; overflow: hidden; background: #eef; }
+
+body {
+  margin: 0;
+  overflow: hidden;
+  background: #eef;
+  font-family: sans-serif;
+}
 #gameArea {
   position: relative;
   width: 100vw;
   height: 100vh;
   background: #cce;
 }
-.worker, .toilet {
+.worker, .toilet, .obstacle {
   position: absolute;
   width: 50px;
   height: 50px;
   background-size: cover;
+  transition: left 0.2s linear;
 }
 .worker {
   background-image: url('https://i.imgur.com/3ZQ3Z2v.png');
@@ -21,13 +28,20 @@ body { margin: 0; overflow: hidden; background: #eef; }
   left: 50px;
   top: 260px;
 }
+.obstacle {
+  top: 230px;
+  background-color: red;
+}
+#restartBtn {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  padding: 10px;
+  font-size: 16px;
+}
 #timer {
   position: absolute;
-  top: 10px;
+  top: 20px;
   right: 20px;
-  font-size: 24px;
-  font-weight: bold;
-  background: #fff;
-  padding: 5px 10px;
-  border-radius: 5px;
+  font-size: 20px;
 }

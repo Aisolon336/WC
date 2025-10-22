@@ -1,59 +1,27 @@
+
 <!DOCTYPE html>
 <html lang="de">
 <head>
   <meta charset="UTF-8">
-  <title>WC-Träger-Spiel</title>
-  <style>
-    body { margin: 0; overflow: hidden; background: #eef; }
-    #gameArea {
-      position: relative;
-      width: 100vw;
-      height: 100vh;
-      background: #cce;
-    }
-    .worker, .toilet {
-      position: absolute;
-      width: 50px;
-      height: 50px;
-      background-size: cover;
-    }
-    .worker {
-      background-image: url('https://i.imgur.com/3ZQ3Z2v.png');
-      left: 50px;
-      top: 200px;
-    }
-    .toilet {
-      background-image: url('https://i.imgur.com/5xXKZzT.png');
-      left: 50px;
-      top: 260px;
-    }
-  </style>
+  <title>WC-Träger-Spiel mit Animation und Sound</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <div id="gameArea">
     <div class="worker" id="worker"></div>
     <div class="toilet" id="toilet"></div>
+    <div class="obstacle" style="left:300px;"></div>
+    <div class="obstacle" style="left:500px;"></div>
+    <div class="obstacle" style="left:700px;"></div>
+    <button id="restartBtn">Neustart</button>
+    <div id="timer">Zeit: 30</div>
   </div>
 
-  <script>
-    const worker = document.getElementById('worker');
-    const toilet = document.getElementById('toilet');
-    let x = 50;
+  <audio id="startSound" src="start.mp3"></audio>
+  <audio id="collisionSound" src="collision.mp3"></audio>
+  <audio id="winSound" src="win.mp3"></audio>
+  <audio id="timeoutSound" src="timeout.mp3"></audio>
 
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'ArrowRight') x += 10;
-      if (e.key === 'ArrowLeft') x -= 10;
-
-      worker.style.left = x + 'px';
-      toilet.style.left = x + 'px';
-
-      if (x > window.innerWidth - 60) {
-        alert('WC erfolgreich transportiert!');
-        x = 50;
-        worker.style.left = x + 'px';
-        toilet.style.left = x + 'px';
-      }
-    });
-  </script>
+  <script src="script.js"></script>
 </body>
 </html>
