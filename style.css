@@ -1,0 +1,33 @@
+body { margin: 0; overflow: hidden; background: #eef; }
+#gameArea {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  background: #cce;
+}
+.worker, .toilet {
+  position: absolute;
+  width: 50px;
+  height: 50px;
+  background-size: cover;
+}
+.worker {
+  background-image: url('https://i.imgur.com/3ZQ3Z2v.png');
+  left: 50px;
+  top: 200px;
+}
+.toilet {
+  background-image: url('https://i.imgur.com/5xXKZzT.png');
+  left: 50px;
+  top: 260px;
+}
+#timer {
+  position: absolute;
+  top: 10px;
+  right: 20px;
+  font-size: 24px;
+  font-weight: bold;
+  background: #fff;
+  padding: 5px 10px;
+  border-radius: 5px;
+}
